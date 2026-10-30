@@ -597,3 +597,60 @@ body {
   white-space: nowrap;
   border-width: 0;
 }
+
+/* ─── AG Grid Theme Overrides ─────────────────────────────── */
+
+.ag-theme-quartz {
+  --ag-header-background-color: var(--bg-surface);
+  --ag-header-foreground-color: var(--text-primary);
+  --ag-background-color: var(--bg-surface);
+  --ag-foreground-color: var(--text-primary);
+  --ag-border-color: var(--border-default);
+  --ag-row-hover-color: rgba(0, 112, 186, 0.04);
+  --ag-selected-row-background-color: rgba(0, 112, 186, 0.08);
+  --ag-header-cell-hover-background-color: rgba(0, 112, 186, 0.06);
+  --ag-font-size: 13px;
+  --ag-header-height: 42px;
+  --ag-row-height: 44px;
+  --ag-cell-horizontal-padding: 12px;
+  --ag-borders: solid 1px;
+  --ag-border-radius: var(--radius-md);
+}
+
+.ag-theme-quartz .ag-header {
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ag-theme-quartz .ag-header-cell {
+  border-bottom: 2px solid var(--paypal-blue) !important;
+}
+
+.ag-theme-quartz .ag-row {
+  border-bottom: 1px solid var(--border-default);
+  transition: background-color 150ms ease;
+}
+
+.ag-theme-quartz .ag-row:last-child {
+  border-bottom: none;
+}
+
+/* ─── Extra Grid Utilities ────────────────────────────────── */
+
+.grid-cols-5 {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+/* ─── Pulse Dot Animation ─────────────────────────────────── */
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+.animate-pulse-dot {
+  animation: pulseDot 2s ease-in-out infinite;
+}
+
