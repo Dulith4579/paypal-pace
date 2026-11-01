@@ -1,0 +1,367 @@
+{
+  "info": {
+    "name": "PayPal Pace – API Testing Collection",
+    "description": "Complete Postman collection for testing all PayPal Pace API endpoints.\n\nBase URL: http://localhost:3000\n\nNo authentication needed for mock endpoints.\nPayPal sandbox credentials needed for live order creation.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Transactions",
+      "item": [
+        {
+          "name": "GET All Transactions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/transactions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "transactions"]
+            },
+            "description": "Returns all 12 mock transactions sorted by date descending.\n\nExpected: 200 OK with { success: true, transactions: [...], total: 12 }"
+          }
+        },
+        {
+          "name": "GET Subscription Transactions Only",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/transactions?type=subscription",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "transactions"],
+              "query": [{ "key": "type", "value": "subscription" }]
+            },
+            "description": "Filters to only recurring subscription charges.\n\nExpected: 200 OK with ~5 subscription transactions"
+          }
+        },
+        {
+          "name": "GET Credit Transactions Only",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/transactions?type=credit",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "transactions"],
+              "query": [{ "key": "type", "value": "credit" }]
+            },
+            "description": "Filters to savings deposits only.\n\nExpected: 200 OK with credit-type transactions"
+          }
+        },
+        {
+          "name": "GET Transactions by Goal",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/transactions?goal_id=goal-001",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "transactions"],
+              "query": [{ "key": "goal_id", "value": "goal-001" }]
+            },
+            "description": "Filters transactions linked to Tokyo Trip goal.\n\nExpected: 200 OK with transactions where goal_id = goal-001"
+          }
+        },
+        {
+          "name": "GET Transactions with Limit",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/transactions?limit=3",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "transactions"],
+              "query": [{ "key": "limit", "value": "3" }]
+            },
+            "description": "Returns only the 3 most recent transactions.\n\nExpected: 200 OK with returned=3"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Subscriptions",
+      "item": [
+        {
+          "name": "GET All Subscriptions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "subscriptions"]
+            },
+            "description": "Returns all 7 subscriptions with summary stats.\n\nExpected: 200 OK with:\n- 3 active, 4 dormant, 0 cancelled\n- potential_monthly_savings: $70.96"
+          }
+        },
+        {
+          "name": "POST Cancel Dormant Subscription (Adobe)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "subscriptions"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sub_id\": \"sub-003\",\n  \"action\": \"cancel\"\n}"
+            },
+            "description": "Cancels Adobe Creative Cloud ($15.99/mo, dormant for 62 days).\n\nExpected: 200 OK with monthly_saved: 15.99"
+          }
+        },
+        {
+          "name": "POST Cancel Dormant Subscription (Hulu)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "subscriptions"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sub_id\": \"sub-004\",\n  \"action\": \"cancel\"\n}"
+            },
+            "description": "Cancels Hulu ($11.99/mo, dormant for 45 days).\n\nExpected: 200 OK with monthly_saved: 11.99"
+          }
+        },
+        {
+          "name": "POST Cancel - Invalid Request",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/subscriptions",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "subscriptions"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"sub_id\": \"sub-999\",\n  \"action\": \"cancel\"\n}"
+            },
+            "description": "Tries to cancel a non-existent subscription.\n\nExpected: 404 Not Found"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. AI Rebalance Agent",
+      "item": [
+        {
+          "name": "POST Rebalance - MacBook ($1,299)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/agent/rebalance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agent", "rebalance"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchase_amount\": 1299,\n  \"product_name\": \"MacBook Air M3\"\n}"
+            },
+            "description": "Simulates buying a $1,299 MacBook.\n\nExpected: 200 OK with:\n- empathy_message (warm, no scolding)\n- 5 impact calculations (one per goal)\n- 4 recovery paths\n- ai_recommendation"
+          }
+        },
+        {
+          "name": "POST Rebalance - Small Purchase ($50)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/agent/rebalance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agent", "rebalance"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchase_amount\": 50,\n  \"product_name\": \"Fancy Dinner\"\n}"
+            },
+            "description": "Simulates a small $50 purchase to see minimal impact.\n\nExpected: 200 OK with small delay_days and daily_hike values"
+          }
+        },
+        {
+          "name": "POST Rebalance - Large Purchase ($3,000)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/agent/rebalance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agent", "rebalance"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchase_amount\": 3000,\n  \"product_name\": \"Designer Handbag\"\n}"
+            },
+            "description": "Simulates a large $3,000 purchase to stress-test recovery paths.\n\nExpected: 200 OK with large delay_days values, still empathetic"
+          }
+        },
+        {
+          "name": "POST Rebalance - Invalid Amount",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/agent/rebalance",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "agent", "rebalance"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"purchase_amount\": -100\n}"
+            },
+            "description": "Tests validation for negative amounts.\n\nExpected: 400 Bad Request with error message"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. PayPal Auth",
+      "item": [
+        {
+          "name": "POST Get Access Token",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/auth",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "auth"]
+            },
+            "description": "Fetches a PayPal OAuth2 access token.\n\nWith placeholder credentials: Returns 500 (expected)\nWith real sandbox credentials: Returns 200 with access_token"
+          }
+        },
+        {
+          "name": "GET Auth (Should Fail)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/auth",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "auth"]
+            },
+            "description": "Tests that GET is rejected.\n\nExpected: 405 Method Not Allowed"
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. PayPal Orders",
+      "item": [
+        {
+          "name": "POST Create Order ($999)",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "orders"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": 999,\n  \"description\": \"iPad Pro 11 M4\",\n  \"currency\": \"USD\"\n}"
+            },
+            "description": "Creates a PayPal sandbox order.\n\nWith placeholder credentials: Returns 500 (expected)\nWith real sandbox credentials: Returns 200 with order_id and approve_url"
+          }
+        },
+        {
+          "name": "POST Create Order - Invalid",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/paypal/orders",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "paypal", "orders"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"amount\": -1\n}"
+            },
+            "description": "Tests validation for invalid amount.\n\nExpected: 400 Bad Request"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Webhooks",
+      "item": [
+        {
+          "name": "POST Simulate Payment Capture Webhook",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/paypal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "webhooks", "paypal"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"WH-TEST-001\",\n  \"event_version\": \"1.0\",\n  \"create_time\": \"2024-01-15T10:00:00Z\",\n  \"resource_type\": \"capture\",\n  \"event_type\": \"PAYMENT.CAPTURE.COMPLETED\",\n  \"summary\": \"Payment completed for $1,299.00 USD\",\n  \"resource\": {\n    \"id\": \"CAP-TEST-001\",\n    \"amount\": {\n      \"currency_code\": \"USD\",\n      \"value\": \"1299.00\"\n    },\n    \"status\": \"COMPLETED\"\n  }\n}"
+            },
+            "description": "Simulates a PayPal PAYMENT.CAPTURE.COMPLETED webhook event.\n\nExpected: 200 OK with { received: true }\nServer logs will show goal recalculation."
+          }
+        },
+        {
+          "name": "POST Simulate Order Approved Webhook",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/paypal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "webhooks", "paypal"]
+            },
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"WH-TEST-002\",\n  \"event_version\": \"1.0\",\n  \"create_time\": \"2024-01-15T10:00:00Z\",\n  \"resource_type\": \"checkout-order\",\n  \"event_type\": \"CHECKOUT.ORDER.APPROVED\",\n  \"summary\": \"Order approved\",\n  \"resource\": {\n    \"id\": \"ORD-TEST-001\",\n    \"status\": \"APPROVED\"\n  }\n}"
+            },
+            "description": "Simulates a PayPal CHECKOUT.ORDER.APPROVED webhook.\n\nExpected: 200 OK with { received: true }"
+          }
+        },
+        {
+          "name": "GET Webhook (Should Fail)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/webhooks/paypal",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "webhooks", "paypal"]
+            },
+            "description": "Tests that GET is rejected.\n\nExpected: 405 Method Not Allowed"
+          }
+        }
+      ]
+    }
+  ]
+}
