@@ -1,3 +1,4 @@
+
 // ============================================================
 // PayPal Pace – Transactions API Route
 // ============================================================
@@ -8,8 +9,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { mockTransactions } from "@/lib/mock-data";
 
 export async function GET(request: NextRequest) {
+  // Read request.url outside try/catch: with cacheComponents, Next.js throws an
+  // internal prerender-bailout signal here that must not be caught and logged.
+  const { searchParams } = new URL(request.url);
   try {
-    const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit") || "20", 10);
     const type = searchParams.get("type"); // "debit" | "credit" | "subscription"
     const goalId = searchParams.get("goal_id");
