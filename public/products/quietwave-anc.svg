@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="QuietWave noise-canceling headphones">
+  <defs>
+    <linearGradient id="cup" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4B5563"/>
+      <stop offset="1" stop-color="#1F2937"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="800" cy="920" rx="420" ry="26" fill="#000" opacity="0.08"/>
+  <!-- headband -->
+  <path d="M470 600 C 470 250, 620 110, 800 110 C 980 110, 1130 250, 1130 600" fill="none" stroke="#374151" stroke-width="70" stroke-linecap="round"/>
+  <path d="M520 560 C 520 290, 650 170, 800 170 C 950 170, 1080 290, 1080 560" fill="none" stroke="#6B7280" stroke-width="16" stroke-linecap="round"/>
+  <!-- ear cups -->
+  <rect x="360" y="520" width="240" height="340" rx="110" fill="url(#cup)"/>
+  <rect x="1000" y="520" width="240" height="340" rx="110" fill="url(#cup)"/>
+  <rect x="560" y="560" width="70" height="260" rx="35" fill="#111827"/>
+  <rect x="970" y="560" width="70" height="260" rx="35" fill="#111827"/>
+  <circle cx="480" cy="690" r="18" fill="#0070BA"/>
+  <circle cx="1120" cy="690" r="18" fill="#9CA3AF"/>
+</svg>

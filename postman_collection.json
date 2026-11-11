@@ -97,7 +97,7 @@
           }
         },
         {
-          "name": "POST Cancel Dormant Subscription (Adobe)",
+          "name": "POST Cancel Dormant Subscription (Creative Suite Pro)",
           "request": {
             "method": "POST",
             "url": {
@@ -112,11 +112,11 @@
               "mode": "raw",
               "raw": "{\n  \"sub_id\": \"sub-003\",\n  \"action\": \"cancel\"\n}"
             },
-            "description": "Cancels Adobe Creative Cloud ($15.99/mo, dormant for 62 days).\n\nExpected: 200 OK with monthly_saved: 15.99"
+            "description": "Cancels Creative Suite Pro ($15.99/mo, dormant for 62 days).\n\nExpected: 200 OK with monthly_saved: 15.99"
           }
         },
         {
-          "name": "POST Cancel Dormant Subscription (Hulu)",
+          "name": "POST Cancel Dormant Subscription (StreamPlus)",
           "request": {
             "method": "POST",
             "url": {
@@ -131,7 +131,7 @@
               "mode": "raw",
               "raw": "{\n  \"sub_id\": \"sub-004\",\n  \"action\": \"cancel\"\n}"
             },
-            "description": "Cancels Hulu ($11.99/mo, dormant for 45 days).\n\nExpected: 200 OK with monthly_saved: 11.99"
+            "description": "Cancels StreamPlus ($11.99/mo, dormant for 45 days).\n\nExpected: 200 OK with monthly_saved: 11.99"
           }
         },
         {
@@ -159,7 +159,7 @@
       "name": "3. AI Rebalance Agent",
       "item": [
         {
-          "name": "POST Rebalance - MacBook ($1,299)",
+          "name": "POST Rebalance - Laptop ($1,299)",
           "request": {
             "method": "POST",
             "url": {
@@ -172,9 +172,9 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"purchase_amount\": 1299,\n  \"product_name\": \"MacBook Air M3\"\n}"
+              "raw": "{\n  \"purchase_amount\": 1299,\n  \"product_name\": \"Apex Air 13 Laptop\"\n}"
             },
-            "description": "Simulates buying a $1,299 MacBook.\n\nExpected: 200 OK with:\n- empathy_message (warm, no scolding)\n- 5 impact calculations (one per goal)\n- 4 recovery paths\n- ai_recommendation"
+            "description": "Simulates buying a $1,299 laptop.\n\nExpected: 200 OK with:\n- empathy_message (warm, no scolding)\n- 5 impact calculations (one per goal)\n- 4 recovery paths\n- ai_recommendation"
           }
         },
         {
@@ -282,7 +282,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"amount\": 999,\n  \"description\": \"iPad Pro 11 M4\",\n  \"currency\": \"USD\"\n}"
+              "raw": "{\n  \"amount\": 999,\n  \"description\": \"Apex Tab Pro 11\",\n  \"currency\": \"USD\"\n}"
             },
             "description": "Creates a PayPal sandbox order.\n\nWith placeholder credentials: Returns 500 (expected)\nWith real sandbox credentials: Returns 200 with order_id and approve_url"
           }

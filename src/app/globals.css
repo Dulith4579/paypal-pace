@@ -2,6 +2,9 @@
 @import "ag-grid-community/styles/ag-grid.css";
 @import "ag-grid-community/styles/ag-theme-quartz.css";
 
+/* Tailwind `dark:` follows <html data-theme="dark"> (set by src/lib/theme.ts) */
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
+
 /* ============================================================
    PayPal Pace – Global Styles & Design Tokens
    ============================================================ */
@@ -14,6 +17,43 @@
   --paypal-navy-hover: #002570;
   --paypal-gold: #ffc439;
   --paypal-gold-hover: #f0b72a;
+
+  color-scheme: light;
+
+  /* Text versions of the brand colors (backgrounds keep --paypal-*) */
+  --brand-text: #003087;
+  --accent-text: #0070ba;
+
+  /* Neutral helpers */
+  --bg-muted: #f3f4f6;
+  --text-neutral: #4b5563;
+  --track: #e5e7eb;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+
+  /* Storefront (Apex Electronics) */
+  --store-bg: #f6f7f9;
+  --store-surface: #ffffff;
+  --store-subtle: #f1f5f9;
+  --store-photo: #ffffff;
+  --store-text: #0f172a;
+  --store-text-2: #334155;
+  --store-text-3: #475569;
+  --store-muted: #64748b;
+  --store-faint: #94a3b8;
+  --store-border: #e2e8f0;
+  --store-border-strong: #cbd5e1;
+  --store-accent: #ea580c;
+  --store-chrome: #0f172a;
+  --store-cta: #0f172a;
+  --store-cta-text: #ffffff;
+  --store-ok: #15803d;
+  --store-ok-bg: #f0fdf4;
+  --store-ok-border: #bbf7d0;
+  --store-deal-bg: #ffedd5;
+  --store-deal-text: #c2410c;
+  --store-error: #b91c1c;
+  --store-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
 
   /* Semantic Colors */
   --bg-primary: #f5f7fa;
@@ -66,6 +106,130 @@
   --transition-normal: 250ms ease;
   --transition-slow: 350ms ease;
   --transition-spring: 500ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ─── Dark theme ───────────────────────────────────────────── */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --brand-text: #9ec5ff;
+  --accent-text: #5cb3f0;
+
+  --bg-primary: #0b1220;
+  --bg-surface: #121b2b;
+  --bg-elevated: #172235;
+  --text-primary: #e6edf7;
+  --text-secondary: #a8b5c8;
+  --text-muted: #7b8ba3;
+  --border-default: #243248;
+  --border-hover: #33455f;
+
+  --success-bg: rgba(16, 185, 129, 0.14);
+  --success-text: #6ee7b7;
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --warning-text: #fcd34d;
+  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-text: #fca5a5;
+  --info-bg: rgba(59, 130, 246, 0.16);
+  --info-text: #93c5fd;
+
+  --bg-muted: #1b2638;
+  --text-neutral: #b6c2d3;
+  --track: #263449;
+  --glass-bg: rgba(18, 27, 43, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 12px 28px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 22px rgba(0, 112, 186, 0.3);
+
+  --store-bg: #0b1120;
+  --store-surface: #131c2c;
+  --store-subtle: #1a2436;
+  --store-photo: #eef1f5;
+  --store-text: #e8eef7;
+  --store-text-2: #c5d0df;
+  --store-text-3: #a9b6c8;
+  --store-muted: #8a9ab0;
+  --store-faint: #66778f;
+  --store-border: #243149;
+  --store-border-strong: #33435d;
+  --store-accent: #fb923c;
+  --store-chrome: #070b15;
+  --store-cta: #f1f5f9;
+  --store-cta-text: #0f172a;
+  --store-ok: #4ade80;
+  --store-ok-bg: rgba(34, 197, 94, 0.12);
+  --store-ok-border: rgba(34, 197, 94, 0.3);
+  --store-deal-bg: rgba(249, 115, 22, 0.18);
+  --store-deal-text: #fdba74;
+  --store-error: #fca5a5;
+  --store-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* No JS yet / blocked storage: follow the OS */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+  color-scheme: dark;
+
+  --brand-text: #9ec5ff;
+  --accent-text: #5cb3f0;
+
+  --bg-primary: #0b1220;
+  --bg-surface: #121b2b;
+  --bg-elevated: #172235;
+  --text-primary: #e6edf7;
+  --text-secondary: #a8b5c8;
+  --text-muted: #7b8ba3;
+  --border-default: #243248;
+  --border-hover: #33455f;
+
+  --success-bg: rgba(16, 185, 129, 0.14);
+  --success-text: #6ee7b7;
+  --warning-bg: rgba(245, 158, 11, 0.14);
+  --warning-text: #fcd34d;
+  --danger-bg: rgba(239, 68, 68, 0.14);
+  --danger-text: #fca5a5;
+  --info-bg: rgba(59, 130, 246, 0.16);
+  --info-text: #93c5fd;
+
+  --bg-muted: #1b2638;
+  --text-neutral: #b6c2d3;
+  --track: #263449;
+  --glass-bg: rgba(18, 27, 43, 0.72);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 1px 3px rgba(0, 0, 0, 0.5), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 6px 16px rgba(0, 0, 0, 0.45), 0 2px 6px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 12px 28px rgba(0, 0, 0, 0.5), 0 4px 10px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 22px rgba(0, 112, 186, 0.3);
+
+  --store-bg: #0b1120;
+  --store-surface: #131c2c;
+  --store-subtle: #1a2436;
+  --store-photo: #eef1f5;
+  --store-text: #e8eef7;
+  --store-text-2: #c5d0df;
+  --store-text-3: #a9b6c8;
+  --store-muted: #8a9ab0;
+  --store-faint: #66778f;
+  --store-border: #243149;
+  --store-border-strong: #33435d;
+  --store-accent: #fb923c;
+  --store-chrome: #070b15;
+  --store-cta: #f1f5f9;
+  --store-cta-text: #0f172a;
+  --store-ok: #4ade80;
+  --store-ok-bg: rgba(34, 197, 94, 0.12);
+  --store-ok-border: rgba(34, 197, 94, 0.3);
+  --store-deal-bg: rgba(249, 115, 22, 0.18);
+  --store-deal-text: #fdba74;
+  --store-error: #fca5a5;
+  --store-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  }
 }
 
 /* ─── Base Styles ──────────────────────────────────────────── */
@@ -436,8 +600,8 @@ body {
 }
 
 .badge-neutral {
-  background: #f3f4f6;
-  color: #4b5563;
+  background: var(--bg-muted);
+  color: var(--text-neutral);
 }
 
 /* ─── Progress Bar ─────────────────────────────────────────── */
@@ -445,7 +609,7 @@ body {
 .progress-bar {
   width: 100%;
   height: 8px;
-  background: #e5e7eb;
+  background: var(--track);
   border-radius: var(--radius-full);
   overflow: hidden;
   position: relative;
@@ -475,10 +639,10 @@ body {
 /* ─── Glass Effect ─────────────────────────────────────────── */
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid var(--glass-border);
 }
 
 .glass-dark {
@@ -654,3 +818,45 @@ body {
   animation: pulseDot 2s ease-in-out infinite;
 }
 
+
+/* ─── Pace Expense Dock: AG Grid quartz-dark ─────────────────── */
+.ag-theme-quartz-dark.pace-grid {
+  --ag-background-color: #0B1F3A;
+  --ag-header-background-color: #001F4D;
+  --ag-foreground-color: #E5EDF7;
+  --ag-header-foreground-color: #FFFFFF;
+  --ag-border-color: rgba(255, 255, 255, 0.08);
+  --ag-row-hover-color: rgba(0, 112, 186, 0.18);
+  --ag-font-size: 13px;
+  --ag-header-height: 42px;
+  --ag-row-height: 44px;
+  --ag-border-radius: 12px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ag-theme-quartz-dark.pace-grid .ag-header {
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ag-theme-quartz-dark.pace-grid .ag-header-cell {
+  border-bottom: 2px solid #0070BA !important;
+}
+.ag-theme-quartz-dark.pace-grid .ag-floating-bottom {
+  border-top: 2px solid #10B981;
+  background: #052e2b;
+}
+.ag-theme-quartz-dark.pace-grid .ag-floating-bottom .ag-cell {
+  font-weight: 700;
+  color: #34D399;
+}
+
+/* ─── PayPal SDK iframes ───────────────────────────────────── */
+/* PayPal renders light-scheme documents. On a dark page the browser would
+   paint those iframes opaque white unless the embedding element's
+   color-scheme matches, so keep the PayPal containers "light" (transparent). */
+.paypal-embed,
+.paypal-embed iframe {
+  color-scheme: light;
+}
