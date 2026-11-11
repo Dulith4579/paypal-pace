@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" role="img" aria-label="ApexView 27-inch 5K display">
+  <defs>
+    <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#1E1B4B"/>
+      <stop offset="0.5" stop-color="#4338CA"/>
+      <stop offset="1" stop-color="#F59E0B"/>
+    </linearGradient>
+    <linearGradient id="stand" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#9CA3AF"/>
+      <stop offset="1" stop-color="#6B7280"/>
+    </linearGradient>
+  </defs>
+  <ellipse cx="800" cy="930" rx="330" ry="22" fill="#000" opacity="0.08"/>
+  <path d="M740 740 H860 L900 900 H700 Z" fill="url(#stand)"/>
+  <rect x="610" y="890" width="380" height="26" rx="12" fill="#6B7280"/>
+  <rect x="200" y="70" width="1200" height="700" rx="22" fill="#1F2937"/>
+  <rect x="222" y="92" width="1156" height="656" rx="6" fill="url(#panel)"/>
+  <path d="M222 600 C 420 520, 640 660, 860 560 S 1240 500, 1378 560 L1378 748 L222 748 Z" fill="#FFFFFF" opacity="0.12"/>
+  <rect x="200" y="770" width="1200" height="8" rx="4" fill="#111827"/>
+</svg>

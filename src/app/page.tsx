@@ -10,6 +10,17 @@ import StudioDashboard from "@/components/StudioDashboard";
 import ExpenseRebalanceGrid from "@/components/ExpenseRebalanceGrid";
 import MilestoneArbitrageCard from "@/components/MilestoneArbitrageCard";
 import InstallmentGuard from "@/components/InstallmentGuard";
+import AgentTimeline from "@/components/AgentTimeline";
+import AgentLab from "@/components/AgentLab";
+import PacingSummaryCard from "@/components/PacingSummaryCard";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+
+// AG Charts renders on a canvas and uses today's date: client-only (no prerender)
+const GoalTrajectoryChart = dynamic(() => import("@/components/GoalTrajectoryChart"), {
+  ssr: false,
+  loading: () => <div className="card p-4 animate-pulse" style={{ height: 392 }} />,
+});
 import { mockMilestones, computeDashboardStats } from "@/lib/mock-data";
 import { formatCurrency } from "@/lib/math-engine";
 import { calculatePacing, type ExpenseItem } from "@/lib/pacing";
@@ -25,10 +36,33 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Shield,
+  FlaskConical,
+  ShoppingBag,
+  PiggyBank,
 } from "lucide-react";
 
+/** Tabs: dashboard = Overview, goals = Goals & Savings, checkout = Agent Lab. Linkable as /#goals etc. */
+const SECTIONS = ["dashboard", "goals", "checkout"] as const;
+
 export default function Home() {
-  const [activeSection, setActiveSection] = useState("dashboard");
+  const [activeSection, setActiveSectionState] = useState("dashboard");
+
+  // Keep the tab in the URL hash so /#goals and /#checkout are shareable
+  useEffect(() => {
+    const fromHash = () => {
+      const h = window.location.hash.replace("#", "");
+      if ((SECTIONS as readonly string[]).includes(h)) setActiveSectionState(h);
+    };
+    fromHash();
+    window.addEventListener("hashchange", fromHash);
+    return () => window.removeEventListener("hashchange", fromHash);
+  }, []);
+
+  const setActiveSection = (section: string) => {
+    setActiveSectionState(section);
+    window.history.replaceState(null, "", section === "dashboard" ? window.location.pathname : `#${section}`);
+    window.scrollTo({ top: 0 });
+  };
   const [rebalanceResult, setRebalanceResult] = useState<RebalanceResult | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [selectedPathMessage, setSelectedPathMessage] = useState<string | null>(null);
@@ -46,7 +80,7 @@ export default function Home() {
 
   // Mock expense items for the grid
   const [expenseItems, setExpenseItems] = useState<ExpenseItem[]>([
-    { expense_id: "exp-001", name: "MacBook Pro", amount: 1299, description: "High utility laptop", paused: false },
+    { expense_id: "exp-001", name: "Pro Laptop", amount: 1299, description: "High utility laptop", paused: false },
     { expense_id: "exp-002", name: "Gym Membership", amount: 45, description: "Health & fitness", paused: false },
     { expense_id: "exp-003", name: "Streaming Service", amount: 12.99, description: "Entertainment", paused: false },
     { expense_id: "exp-004", name: "Cloud Storage", amount: 9.99, description: "Software subscription", paused: false },
@@ -117,8 +151,16 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  <button id="hero-simulate-btn" className="btn btn-gold btn-lg" onClick={() => setActiveSection("checkout")}>
-                    <Sparkles className="w-4 h-4" /> Simulate Purchase
+                  <Link id="hero-store-btn" href="/store" className="btn btn-gold btn-lg">
+                    <ShoppingBag className="w-4 h-4" /> Shop with Pace
+                  </Link>
+                  <button
+                    id="hero-simulate-btn"
+                    className="btn btn-lg"
+                    style={{ background: "rgba(255,255,255,0.15)", color: "#fff", border: "1px solid rgba(255,255,255,0.35)" }}
+                    onClick={() => setActiveSection("checkout")}
+                  >
+                    <FlaskConical className="w-4 h-4" /> Open Agent Lab
                   </button>
                 </div>
               </div>
@@ -166,6 +208,41 @@ export default function Home() {
             {/* Next-installment guard: appears once a PayPal plan is captured in the store */}
             <InstallmentGuard />
 
+            {/* Goal trajectory (AG Charts) + Agent Activity Timeline */}
+            <div className="grid gap-6 lg:grid-cols-2 items-start mb-6">
+              <GoalTrajectoryChart />
+              <AgentTimeline />
+            </div>
+
+            {/* Pointer to the moved goal tools */}
+            <button
+              id="overview-goals-cta"
+              onClick={() => setActiveSection("goals")}
+              className="card p-4 mb-8 w-full flex items-center justify-between gap-3 text-left transition-transform hover:scale-[1.005]"
+            >
+              <span className="flex items-center gap-3">
+                <PiggyBank className="w-5 h-5" style={{ color: "#10B981" }} />
+                <span>
+                  <span className="block text-sm font-semibold">Find money for your goals</span>
+                  <span className="block text-xs" style={{ color: "var(--text-muted)" }}>
+                    Hibernate subscriptions, test impulse buys and contribute to milestones in Goals &amp; Savings
+                  </span>
+                </span>
+              </span>
+              <ArrowUpRight className="w-4 h-4 flex-shrink-0" style={{ color: "var(--text-muted)" }} />
+            </button>
+          </>
+        )}
+
+        {activeSection === "goals" && (
+          <>
+            <div className="mb-6">
+              <h1 className="text-2xl font-extrabold mb-1">Goals &amp; Savings</h1>
+              <p className="text-sm" style={{ color: "var(--text-muted)" }}>
+                Where your money goes, and what Pace suggests changing to protect your goals.
+              </p>
+            </div>
+
             <MilestoneArbitrageCard />
 
             {/* Milestone Cards */}
@@ -195,6 +272,7 @@ export default function Home() {
 
         {activeSection === "checkout" && (
           <>
+            <AgentLab />
             <CheckoutSimulator onPurchaseComplete={handlePurchaseComplete} />
             <section className="my-8" id="grid-section">
               <ExpenseRebalanceGrid
@@ -206,20 +284,7 @@ export default function Home() {
                 onExpenseToggle={setExpenseItems}
               />
             </section>
-            {pacingSummary && (
-              <section className="mt-8" id="justification-section">
-                <div className="card p-5">
-                  <h2 className="text-lg font-bold mb-4" style={{ color: "var(--text-primary)" }}>Live Pacing Summary</h2>
-                  <pre
-                    className="p-4 rounded-lg overflow-x-auto text-sm"
-                    style={{ background: "var(--bg-primary)", color: "var(--text-primary)", border: "1px solid var(--border-default)" }}
-                    data-testid="pacing-summary"
-                  >
-{JSON.stringify(pacingSummary, null, 2)}
-                  </pre>
-                </div>
-              </section>
-            )}
+            {pacingSummary?.intelligence && <PacingSummaryCard summary={pacingSummary} productName={productName} />}
           </>
         )}
 
@@ -229,7 +294,7 @@ export default function Home() {
           style={{ borderTop: "1px solid var(--border-default)", background: "var(--bg-surface)" }}
         >
           <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-            Built with ❤️ for the <strong style={{ color: "var(--paypal-blue)" }}>PayPal AI Hackathon</strong> — Powered by <strong style={{ color: "var(--paypal-navy)" }}>AG Grid Studio</strong> &amp; <strong>Next.js</strong>
+            Built with ❤️ for the <strong style={{ color: "var(--accent-text)" }}>PayPal AI Hackathon</strong> — Powered by <strong style={{ color: "var(--brand-text)" }}>AG Grid Studio</strong> &amp; <strong>Next.js</strong>
           </p>
         </footer>
 

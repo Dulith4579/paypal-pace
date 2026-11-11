@@ -1,13 +1,6 @@
-// ============================================================
-// PayPal Pace – Mock / Seed Data
-// ============================================================
-// Fallback data for milestones, transactions, and subscriptions
-// used when PayPal sandbox is unavailable or for demo purposes.
-// ============================================================
-
+// src/lib/mock-data.ts
 import type { Milestone, Transaction, Subscription, SimulatorProduct, DashboardStats } from "@/types/financial";
 
-// Helper to generate dates relative to today
 function futureDate(days: number): string {
   const d = new Date();
   d.setDate(d.getDate() + days);
@@ -21,8 +14,35 @@ function pastDate(days: number): string {
 }
 
 // ────────────────────────────────────────────────────────────
-// MILESTONES
+// User Financial Profile
 // ────────────────────────────────────────────────────────────
+export const userProfile = {
+  name: "Alex Chen",
+  status: "Computing / CS Student & Part-Time Freelancer",
+  monthly_net_inflow: 1800.0,
+  // Alias for component expectations
+  monthly_inflow: 1800.0,
+  // Rent share, food, transport — what's left flows to savings goals
+  monthly_fixed_costs: 450.0,
+  primary_goal: {
+    name: "Japan Autumn Trip",
+    saved: 2150,
+    target: 3200,
+    // Relative so the demo never drifts. At 44 days the real solver resolves
+    // Pay in 4 + paused leaks to 0 days delay, while paying in full still
+    // delays the trip. (At ~51+ days every plan is 0-delay and the
+    // comparison stops being meaningful; below ~41 Pay in 4 slips too.)
+    target_date: futureDate(44),
+  },
+  cart_item: {
+    name: "Apex Air 13 Dev Workstation",
+    price: 1099.0,
+    utility_class: "Career Asset / High ROI",
+  },
+};
+
+
+// Milestones
 export const mockMilestones: Milestone[] = [
   {
     goal_id: "goal-001",
@@ -48,7 +68,7 @@ export const mockMilestones: Milestone[] = [
   },
   {
     goal_id: "goal-003",
-    name: "MacBook Pro 💻",
+    name: "Pro Laptop Upgrade 💻",
     target_amount: 2499,
     current_balance: 1100,
     target_date: futureDate(90),
@@ -79,11 +99,21 @@ export const mockMilestones: Milestone[] = [
     icon: "Dumbbell",
     created_at: pastDate(20),
   },
+  // Japan Autumn Trip goal
+  {
+    goal_id: "goal-006",
+    name: "Japan Autumn Trip",
+    target_amount: 3200,
+    current_balance: 2150,
+    target_date: futureDate(44), // same deadline as userProfile.primary_goal
+    category: "travel",
+    status: "active",
+    icon: "Plane",
+    created_at: pastDate(30),
+  },
 ];
 
-// ────────────────────────────────────────────────────────────
-// TRANSACTIONS
-// ────────────────────────────────────────────────────────────
+// Transactions
 export const mockTransactions: Transaction[] = [
   {
     tx_id: "tx-001",
@@ -99,7 +129,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-002",
     goal_id: null,
     amount: 14.99,
-    merchant: "Netflix",
+    merchant: "StreamFlix",
     date: pastDate(5),
     is_subscription: true,
     type: "debit",
@@ -109,7 +139,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-003",
     goal_id: null,
     amount: 9.99,
-    merchant: "Spotify",
+    merchant: "TuneBox",
     date: pastDate(7),
     is_subscription: true,
     type: "debit",
@@ -129,7 +159,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-005",
     goal_id: null,
     amount: 42.5,
-    merchant: "DoorDash",
+    merchant: "QuickBite Delivery",
     date: pastDate(1),
     is_subscription: false,
     type: "debit",
@@ -143,13 +173,13 @@ export const mockTransactions: Transaction[] = [
     date: pastDate(3),
     is_subscription: false,
     type: "credit",
-    description: "MacBook savings deposit",
+    description: "Laptop savings deposit",
   },
   {
     tx_id: "tx-007",
     goal_id: null,
     amount: 15.99,
-    merchant: "Adobe Creative Cloud",
+    merchant: "Creative Suite Pro",
     date: pastDate(12),
     is_subscription: true,
     type: "debit",
@@ -159,7 +189,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-008",
     goal_id: null,
     amount: 6.99,
-    merchant: "iCloud Storage",
+    merchant: "Cloud Drive Storage",
     date: pastDate(15),
     is_subscription: true,
     type: "debit",
@@ -179,7 +209,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-010",
     goal_id: null,
     amount: 129.99,
-    merchant: "Amazon",
+    merchant: "Online Marketplace",
     date: pastDate(4),
     is_subscription: false,
     type: "debit",
@@ -189,7 +219,7 @@ export const mockTransactions: Transaction[] = [
     tx_id: "tx-011",
     goal_id: null,
     amount: 11.99,
-    merchant: "Hulu",
+    merchant: "StreamPlus",
     date: pastDate(20),
     is_subscription: true,
     type: "debit",
@@ -207,13 +237,11 @@ export const mockTransactions: Transaction[] = [
   },
 ];
 
-// ────────────────────────────────────────────────────────────
-// SUBSCRIPTIONS
-// ────────────────────────────────────────────────────────────
+// Subscriptions
 export const mockSubscriptions: Subscription[] = [
   {
     sub_id: "sub-001",
-    service_name: "Netflix",
+    service_name: "StreamFlix",
     monthly_cost: 14.99,
     last_used_date: pastDate(2),
     status: "active",
@@ -221,7 +249,7 @@ export const mockSubscriptions: Subscription[] = [
   },
   {
     sub_id: "sub-002",
-    service_name: "Spotify Premium",
+    service_name: "TuneBox Premium",
     monthly_cost: 9.99,
     last_used_date: pastDate(1),
     status: "active",
@@ -229,7 +257,7 @@ export const mockSubscriptions: Subscription[] = [
   },
   {
     sub_id: "sub-003",
-    service_name: "Adobe Creative Cloud",
+    service_name: "Creative Suite Pro",
     monthly_cost: 15.99,
     last_used_date: pastDate(62),
     status: "dormant",
@@ -237,7 +265,7 @@ export const mockSubscriptions: Subscription[] = [
   },
   {
     sub_id: "sub-004",
-    service_name: "Hulu",
+    service_name: "StreamPlus",
     monthly_cost: 11.99,
     last_used_date: pastDate(45),
     status: "dormant",
@@ -245,7 +273,7 @@ export const mockSubscriptions: Subscription[] = [
   },
   {
     sub_id: "sub-005",
-    service_name: "iCloud Storage",
+    service_name: "Cloud Drive Storage",
     monthly_cost: 6.99,
     last_used_date: pastDate(1),
     status: "active",
@@ -269,21 +297,19 @@ export const mockSubscriptions: Subscription[] = [
   },
 ];
 
-// ────────────────────────────────────────────────────────────
-// SIMULATOR PRODUCTS
-// ────────────────────────────────────────────────────────────
+// Simulator products
 export const simulatorProducts: SimulatorProduct[] = [
   {
     id: "prod-001",
-    name: 'MacBook Air 15" M3',
+    name: 'Apex Air 15" Laptop',
     price: 1299,
     image: "/products/macbook.png",
     category: "Tech",
-    description: "Apple M3 chip, 16GB RAM, 256GB SSD, Midnight finish",
+    description: "8-core chip, 16GB RAM, 256GB SSD, Midnight finish",
   },
   {
     id: "prod-002",
-    name: "Sony WH-1000XM5",
+    name: "QuietWave ANC Headphones",
     price: 348,
     image: "/products/headphones.png",
     category: "Tech",
@@ -291,15 +317,15 @@ export const simulatorProducts: SimulatorProduct[] = [
   },
   {
     id: "prod-003",
-    name: "iPad Pro 11″ M4",
+    name: "Apex Tab Pro 11\"",
     price: 999,
     image: "/products/ipad.png",
     category: "Tech",
-    description: "M4 chip, Ultra Retina XDR display, Wi-Fi 6E",
+    description: "Octa-core chip, 120Hz OLED display, Wi-Fi 6E",
   },
   {
     id: "prod-004",
-    name: "PlayStation 5 Pro",
+    name: "Game Console Pro",
     price: 699,
     image: "/products/ps5.png",
     category: "Gaming",
@@ -307,7 +333,7 @@ export const simulatorProducts: SimulatorProduct[] = [
   },
   {
     id: "prod-005",
-    name: "DJI Mini 4 Pro",
+    name: "SkyLite Mini Drone",
     price: 759,
     image: "/products/drone.png",
     category: "Tech",
@@ -315,9 +341,7 @@ export const simulatorProducts: SimulatorProduct[] = [
   },
 ];
 
-// ────────────────────────────────────────────────────────────
-// DASHBOARD STATS (computed from mock data)
-// ────────────────────────────────────────────────────────────
+// Dashboard stats computation
 export function computeDashboardStats(): DashboardStats {
   const activeMilestones = mockMilestones.filter((m) => m.status === "active");
   const totalSaved = activeMilestones.reduce((sum, m) => sum + m.current_balance, 0);

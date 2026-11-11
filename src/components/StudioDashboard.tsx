@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import {
   BarChart3,
   Table2,
@@ -10,11 +10,31 @@ import {
   ChevronDown,
   Send,
   Sparkles,
-  ArrowUpDown,
-  Filter,
+  Search,
   Download,
 } from "lucide-react";
 import type { StudioSource } from "@/lib/studio-config";
+import { AgGridReact } from "ag-grid-react";
+import { ModuleRegistry, AllCommunityModule, type ICellRendererParams } from "ag-grid-community";
+
+// Register here too, so this grid never depends on another component loading first (error #200)
+ModuleRegistry.registerModules([AllCommunityModule]);
+
+/** "progressRenderer" referenced by milestoneGridColDefs (studio-config). */
+function ProgressCell(p: ICellRendererParams) {
+  const v = Math.max(0, Math.min(100, Number(p.value) || 0));
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, height: "100%" }}>
+      <div style={{ flex: 1, height: 6, borderRadius: 3, background: "rgba(255,255,255,0.12)" }}>
+        <div style={{ width: `${v}%`, height: 6, borderRadius: 3, background: v >= 100 ? "#34D399" : "#0070BA" }} />
+      </div>
+      <span style={{ fontSize: 12, minWidth: 38, textAlign: "right" }}>{v.toFixed(0)}%</span>
+    </div>
+  );
+}
+const GRID_COMPONENTS = { progressRenderer: ProgressCell };
+import { milestoneGridColDefs, transactionGridColDefs, subscriptionGridColDefs } from "@/lib/studio-config";
+
 import {
   getMilestonesSource,
   getTransactionsSource,
@@ -50,6 +70,10 @@ export default function StudioDashboard() {
     Array<{ role: "user" | "assistant"; content: string }>
   >([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  // AG Grid quick filter (searches every column) + CSV export
+  const gridRef = useRef<AgGridReact>(null);
+  const [quickFilter, setQuickFilter] = useState("");
+  const [shownRows, setShownRows] = useState<number | null>(null);
 
   const [milestonesData, setMilestonesData] = useState<StudioSource>(emptySource);
   const [transactionsData, setTransactionsData] = useState<StudioSource>(emptySource);
@@ -88,6 +112,14 @@ export default function StudioDashboard() {
       return sortDir === "asc" ? aStr.localeCompare(bStr) : bStr.localeCompare(aStr);
     });
   }, [currentSource.data, sortField, sortDir]);
+
+  const exportCsv = useCallback(() => {
+    gridRef.current?.api?.exportDataAsCsv({
+      fileName: `paypal-pace-${activeTab}-${new Date().toISOString().split("T")[0]}.csv`,
+      // Respects the current search + column filters + sort: "export what you see"
+      exportedRows: "filteredAndSorted",
+    });
+  }, [activeTab]);
 
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -141,7 +173,7 @@ export default function StudioDashboard() {
             className="w-9 h-9 rounded-lg flex items-center justify-center"
             style={{ background: "rgba(0, 112, 186, 0.1)" }}
           >
-            <BarChart3 className="w-5 h-5" style={{ color: "var(--paypal-blue)" }} />
+            <BarChart3 className="w-5 h-5" style={{ color: "var(--accent-text)" }} />
           </div>
           <div>
             <h2 className="text-base font-bold flex items-center gap-2">
@@ -157,13 +189,19 @@ export default function StudioDashboard() {
               </span>
             </h2>
             <p className="text-xs" style={{ color: "var(--text-muted)" }}>
-              Interactive data exploration & AI-powered insights
+              Interactive data exploration &amp; AI-powered insights
             </p>
           </div>
         </div>
-        <button className="btn btn-ghost btn-sm">
+        <button
+          className="btn btn-ghost btn-sm"
+          id="studio-export-csv-header"
+          onClick={exportCsv}
+          disabled={activeTab === "ai-chat"}
+          title="Export the current table as CSV (AG Grid)"
+        >
           <Download className="w-4 h-4" />
-          Export
+          Export CSV
         </button>
       </div>
 
@@ -219,7 +257,7 @@ export default function StudioDashboard() {
                 >
                   <Sparkles className="w-7 h-7 text-white" />
                 </div>
-                <h3 className="text-lg font-bold mb-1" style={{ color: "var(--paypal-navy)" }}>
+                <h3 className="text-lg font-bold mb-1" style={{ color: "var(--brand-text)" }}>
                   AI Financial Assistant
                 </h3>
                 <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
@@ -239,7 +277,7 @@ export default function StudioDashboard() {
                         setAiInput(prompt);
                       }}
                     >
-                      <Sparkles className="w-3 h-3 inline mr-1.5" style={{ color: "var(--paypal-blue)" }} />
+                      <Sparkles className="w-3 h-3 inline mr-1.5" style={{ color: "var(--accent-text)" }} />
                       {prompt}
                     </button>
                   ))}
@@ -280,7 +318,7 @@ export default function StudioDashboard() {
                       }}
                     >
                       <span className="flex items-center gap-2" style={{ color: "var(--text-muted)" }}>
-                        <Sparkles className="w-4 h-4 animate-spin" style={{ color: "var(--paypal-blue)" }} />
+                        <Sparkles className="w-4 h-4 animate-spin" style={{ color: "var(--accent-text)" }} />
                         Analyzing your data...
                       </span>
                     </div>
@@ -318,138 +356,51 @@ export default function StudioDashboard() {
             </div>
           </div>
         ) : (
-          /* Data Grid */
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr style={{ borderBottom: "2px solid var(--border-default)" }}>
-                  {currentSource.columns
-                    .filter((col) => !["goal_id", "sub_id", "tx_id"].includes(col.field))
-                    .map((col) => (
-                      <th
-                        key={col.field}
-                        className="text-left py-3 px-3 font-semibold cursor-pointer transition-colors hover:bg-gray-50 select-none"
-                        style={{
-                          color: sortField === col.field ? "var(--paypal-blue)" : "var(--text-secondary)",
-                          fontSize: "0.75rem",
-                          letterSpacing: "0.025em",
-                          textTransform: "uppercase",
-                          minWidth: col.width ? `${col.width}px` : undefined,
-                        }}
-                        onClick={() => handleSort(col.field)}
-                      >
-                        <span className="flex items-center gap-1">
-                          {col.headerName}
-                          {sortField === col.field && (
-                            <ArrowUpDown className="w-3 h-3" />
-                          )}
-                        </span>
-                      </th>
-                    ))}
-                </tr>
-              </thead>
-              <tbody>
-                {sortedData.map((row, rowIndex) => (
-                  <tr
-                    key={rowIndex}
-                    className="transition-colors hover:bg-gray-50"
-                    style={{
-                      borderBottom: "1px solid var(--border-default)",
-                    }}
-                  >
-                    {currentSource.columns
-                      .filter((col) => !["goal_id", "sub_id", "tx_id"].includes(col.field))
-                      .map((col) => {
-                        let cellValue = row[col.field];
-                        let cellStyle: React.CSSProperties = {
-                          color: "var(--text-primary)",
-                        };
-
-                        // Format numbers as currency where applicable
-                        if (
-                          col.type === "number" &&
-                          typeof cellValue === "number"
-                        ) {
-                          if (
-                            col.field.includes("amount") ||
-                            col.field.includes("balance") ||
-                            col.field.includes("cost") ||
-                            col.field.includes("rate")
-                          ) {
-                            cellValue = formatCurrency(cellValue);
-                          } else if (col.field.includes("pct")) {
-                            cellValue = `${(cellValue as number).toFixed(1)}%`;
-                            const pct = cellValue as unknown as number;
-                            if (typeof row[col.field] === "number") {
-                              const n = row[col.field] as number;
-                              cellStyle.color =
-                                n >= 70
-                                  ? "var(--success)"
-                                  : n >= 40
-                                    ? "var(--warning)"
-                                    : "var(--danger)";
-                              cellStyle.fontWeight = 600;
-                            }
-                          }
-                        }
-
-                        // Boolean rendering
-                        if (col.type === "boolean") {
-                          cellValue = cellValue ? "Yes" : "No";
-                        }
-
-                        // Status badges
-                        if (col.field === "status") {
-                          const status = String(cellValue);
-                          const badgeClass =
-                            status === "active"
-                              ? "badge-success"
-                              : status === "dormant"
-                                ? "badge-warning"
-                                : status === "cancelled"
-                                  ? "badge-danger"
-                                  : "badge-neutral";
-                          return (
-                            <td key={col.field} className="py-2.5 px-3">
-                              <span className={`badge ${badgeClass}`}>
-                                {status}
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        // Type badges for transactions
-                        if (col.field === "type") {
-                          const txType = String(cellValue);
-                          const badgeClass =
-                            txType === "credit"
-                              ? "badge-success"
-                              : txType === "debit"
-                                ? "badge-danger"
-                                : "badge-info";
-                          return (
-                            <td key={col.field} className="py-2.5 px-3">
-                              <span className={`badge ${badgeClass}`}>
-                                {txType}
-                              </span>
-                            </td>
-                          );
-                        }
-
-                        return (
-                          <td
-                            key={col.field}
-                            className="py-2.5 px-3"
-                            style={cellStyle}
-                          >
-                            {String(cellValue ?? "—")}
-                          </td>
-                        );
-                      })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+          <>
+            {/* Data Grid using AG Grid */}
+            {/* Quick filter: one search box across every column (AG Grid quickFilterText) */}
+            <div className="flex flex-wrap items-center gap-2 mb-3">
+              <div
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg flex-1 min-w-0"
+                style={{ background: "var(--bg-primary)", border: "1px solid var(--border-default)", maxWidth: 360 }}
+              >
+                <Search className="w-3.5 h-3.5" style={{ color: "var(--text-muted)" }} />
+                <input
+                  id="studio-quick-filter"
+                  type="search"
+                  value={quickFilter}
+                  onChange={(e) => setQuickFilter(e.target.value)}
+                  placeholder={
+                    activeTab === "transactions" ? "Search merchant, note, amount…" : activeTab === "subscriptions" ? "Search service, status…" : "Search goals…"
+                  }
+                  className="flex-1 bg-transparent text-sm outline-none min-w-0"
+                  style={{ color: "var(--text-primary)" }}
+                />
+              </div>
+            </div>
+            <div className="ag-theme-quartz-dark pace-grid h-[500px]" style={{ width: "100%" }}>
+              <AgGridReact
+                // Fresh grid per tab: never apply one tab's columns to another tab's rows
+                key={activeTab}
+                ref={gridRef}
+                theme="legacy"
+                components={GRID_COMPONENTS}
+                quickFilterText={quickFilter}
+                onModelUpdated={(e) => setShownRows(e.api.getDisplayedRowCount())}
+                rowData={sortedData}
+                columnDefs={
+                  activeTab === "milestones"
+                    ? milestoneGridColDefs
+                    : activeTab === "transactions"
+                    ? transactionGridColDefs
+                    : activeTab === "subscriptions"
+                    ? subscriptionGridColDefs
+                    : []
+                }
+                defaultColDef={{ sortable: true, filter: true, resizable: true }}
+                animateRows={true}
+              />
+            </div>
 
             {/* Grid Footer */}
             <div
@@ -457,20 +408,17 @@ export default function StudioDashboard() {
               style={{ borderTop: "1px solid var(--border-default)" }}
             >
               <span className="text-xs" style={{ color: "var(--text-muted)" }}>
-                Showing {sortedData.length} of {currentSource.data.length} records
+                Showing {shownRows ?? sortedData.length} of {currentSource.data.length} records
+                {quickFilter && ` matching “${quickFilter}”`} · click a header to sort, ☰ to filter a column
               </span>
               <div className="flex items-center gap-2">
-                <button className="btn btn-ghost btn-sm">
-                  <Filter className="w-3.5 h-3.5" />
-                  Filter
-                </button>
-                <button className="btn btn-ghost btn-sm">
-                  <ArrowUpDown className="w-3.5 h-3.5" />
-                  Sort
+                <button className="btn btn-ghost btn-sm" id="studio-export-csv" onClick={exportCsv}>
+                  <Download className="w-3.5 h-3.5" />
+                  Export CSV
                 </button>
               </div>
             </div>
-          </div>
+          </>
         )}
       </div>
     </div>

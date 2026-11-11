@@ -16,6 +16,9 @@ export interface CreateOrderRequest {
   intent: "CAPTURE" | "AUTHORIZE";
   purchase_units: PurchaseUnit[];
   application_context?: ApplicationContext;
+  payment_source?: {
+    card?: { number: string; expiry: string; security_code: string; name: string };
+  };
 }
 
 export interface PurchaseUnit {
@@ -31,6 +34,8 @@ export interface PurchaseUnit {
     };
   };
   items?: OrderItem[];
+  custom_id?: string;
+  payments?: { captures?: { id: string; status: string }[] };
 }
 
 export interface MoneyValue {

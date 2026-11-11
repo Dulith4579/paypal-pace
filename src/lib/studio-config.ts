@@ -216,7 +216,8 @@ export const milestoneGridColDefs = [
     headerName: "Saved",
     flex: 1,
     minWidth: 100,
-    valueFormatter: (p: { value: number }) =>
+    valueFormatter: (p: { value: number | null | undefined }) =>
+      p.value == null ? "" :
       `$${p.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
   },
   {
@@ -224,12 +225,14 @@ export const milestoneGridColDefs = [
     headerName: "Target",
     flex: 1,
     minWidth: 100,
-    valueFormatter: (p: { value: number }) =>
+    valueFormatter: (p: { value: number | null | undefined }) =>
+      p.value == null ? "" :
       `$${p.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
   },
   { field: "target_date", headerName: "Due Date", flex: 1, minWidth: 120 },
   { field: "daily_burn_rate", headerName: "Daily Rate", flex: 1, minWidth: 110,
-    valueFormatter: (p: { value: number }) =>
+    valueFormatter: (p: { value: number | null | undefined }) =>
+      p.value == null ? "" :
       `$${p.value.toFixed(2)}/day`,
   },
   { field: "status", headerName: "Status", flex: 1, minWidth: 100 },
@@ -243,7 +246,8 @@ export const transactionGridColDefs = [
     headerName: "Amount",
     flex: 1,
     minWidth: 100,
-    valueFormatter: (p: { value: number }) =>
+    valueFormatter: (p: { value: number | null | undefined }) =>
+      p.value == null ? "" :
       `$${p.value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
   },
   { field: "type", headerName: "Type", flex: 1, minWidth: 90 },
@@ -258,7 +262,8 @@ export const subscriptionGridColDefs = [
     headerName: "Monthly",
     flex: 1,
     minWidth: 100,
-    valueFormatter: (p: { value: number }) =>
+    valueFormatter: (p: { value: number | null | undefined }) =>
+      p.value == null ? "" :
       `$${p.value.toFixed(2)}`,
   },
   { field: "last_used_date", headerName: "Last Used", flex: 1, minWidth: 120 },
